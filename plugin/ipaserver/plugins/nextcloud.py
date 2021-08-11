@@ -82,7 +82,7 @@ group.group.takes_params = group.group.takes_params + (
          ),
 )
 group.group_add.register_pre_callback(groupadd_precallback)
-group.group.register_pre_callback(groupmod_precallback)
+group.group_mod.register_pre_callback(groupmod_precallback)
 group.group.default_attributes = group.group.default_attributes + ['nextcloudenabled']
 group.group.managed_permissions = {**group.group.managed_permissions, **{
     'System: Read Group Nextcloud Attributes': {
