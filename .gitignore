@@ -322,4 +322,4 @@ $RECYCLE.BIN/
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,linux,windows,python,jetbrains+all,visualstudiocode
 
-!freeipa-jpegphoto.spec
+!freeipa-nextcloud.spec

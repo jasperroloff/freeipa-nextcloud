@@ -1,5 +1,6 @@
 ################################################################################
-# userncquota.py - FreeIPA plugin to set a quota for nextcloud users
+# userncenabled.py - FreeIPA plugin to allow to enable users for nextcloud 
+#                    via cli
 ################################################################################
 #
 # Copyright (C) $( 2020 ) Radio Bern RaBe
@@ -27,9 +28,9 @@
 #  Simon Nussbaum <smirta@gmx.net>
 #
 # Description:
-# With this plugin a switch will be added to the ipa cli to set a quota for
-# users connecting to nextcloud. It will set the Attribute nextcloudQuota.
-# Allowed values are 'default' or an integer with 'MB', 'GB' etc.
+# With this plugin a switch will be added to the ipa cli to allow users to 
+# connect to nextcloud. It will set the Attribute nextcloudEnabled either to 
+# TRUE or FALSE.
 #
 # For this to work, extending the LDAP schema is required.
 #
@@ -37,40 +38,40 @@
 # Copy file to <path to python lib>/ipaserver/plugins/
 #
 # Usage:
-# ipa user-mod --nextcloudquota="100 MB" <username>
+# ipa user-mod --nextcloudenabled=TRUE <username>
 #
 
 from ipaserver.plugins import user
-from ipalib.parameters import Str
-from ipalib.text import _
+from ipalib.parameters import Bool
+from ipalib import _
 
 user.user.takes_params = user.user.takes_params + (
-    Str('nextcloudquota?',
-        cli_name='nextcloudquota',
-        label=_('Nextcloud Share Quota'),
-        doc=_('Defines Nextcloud share quota in Bytes. Allowed values are "none", "default", e.g. "1024 MB" (default is "default").'),
-        default=u'default',
-        autofill=true,
-        pattern='^(default|none|[0-9]+ [MGT]B)$',
-        pattern_errmsg='may only be "none", "default" or a number of mega-, giga- or terabytes (e.g. 1024 MB)',
-        ),
-    )
+    Bool('nextcloudenabled?',
+         cli_name='nextcloudenabled',
+         label=_('Nextcloud Share enabled?'),
+         doc=_('Whether or not a nextcloud share is created for this user (default is false).'),
+         default=False,
+         autofill=True,
+         ),
+)
 
-user.user.default_attributes.append('nextcloudquota')
+user.user.default_attributes.append('nextcloudenabled')
 
-def useradd_precallback(self, ldap, dn, entry, attrs_list,
-                        *keys, **options):
+
+def useradd_precallback(self, ldap, dn, entry, attrs_list, *keys, **options):
     entry['objectclass'].append('nextclouduser')
     return dn
 
+
 user.user_add.register_pre_callback(useradd_precallback)
 
-def usermod_precallback(self, ldap, dn, entry, attrs_list,
-                        *keys, **options):
+
+def usermod_precallback(self, ldap, dn, entry, attrs_list, *keys, **options):
     if 'objectclass' not in entry.keys():
         old_entry = ldap.get_entry(dn, ['objectclass'])
         entry['objectclass'] = old_entry['objectclass']
     entry['objectclass'].append('nextclouduser')
     return dn
+
 
 user.user_mod.register_pre_callback(usermod_precallback)

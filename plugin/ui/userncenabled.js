@@ -39,36 +39,33 @@
  * Copy file to /usr/share/ipa/ui/js/plugins/userncenabled/userncenabled.js
  *
  */
-define([
-		'freeipa/phases',
-		'freeipa/user'],
-		function(phases, user_mod) {
-			
-// helper function
-function get_item(array, attr, value) {
-	for (var i=0,l=array.length; i<l; i++) {
-		if (array[i][attr] === value) 
-			return array[i];
-		}
-		return null;
-}
+define(['freeipa/phases', 'freeipa/user'], function (phases, user_mod) {
 
-var nc_enabled_plugin = {};
+    // helper function
+    function get_item(array, attr, value) {
+        for (var i = 0, l = array.length; i < l; i++) {
+            if (array[i][attr] === value)
+                return array[i];
+        }
+        return null;
+    }
 
-// adds nextcloud enabled field into user account facet
-nc_enabled_plugin.add_nc_enabled_pre_op = function() {	
-	var facet = get_item(user_mod.entity_spec.facets, '$type', 'details');
-	var section = get_item(facet.sections, 'name', 'account');
-	section.fields.push({
-				$type: 'checkbox', 
-				name: 'nextcloudenabled', 
-				label: 'Nextcloud Share enabled',
-				flags: ['w_if_no_aci']
-	});
-	return true;	
-};
+    var nc_enabled_plugin = {};
 
-phases.on('customization', nc_enabled_plugin.add_nc_enabled_pre_op);
+    // adds nextcloud enabled field into user account facet
+    nc_enabled_plugin.add_nc_enabled_pre_op = function () {
+        var facet = get_item(user_mod.entity_spec.facets, '$type', 'details');
+        var section = get_item(facet.sections, 'name', 'account');
+        section.fields.push({
+            $type: 'checkbox',
+            name: 'nextcloudenabled',
+            label: 'Nextcloud Share enabled',
+            flags: ['w_if_no_aci']
+        });
+        return true;
+    };
 
-return nc_enabled_plugin;
+    phases.on('customization', nc_enabled_plugin.add_nc_enabled_pre_op);
+
+    return nc_enabled_plugin;
 });
