@@ -4,7 +4,7 @@
 %global ipa_python3_sitelib %{python3_sitelib}
 
 Name:           freeipa-%{plugin_name}
-Version:        0.1.5
+Version:        0.1.6
 Release:        1%{?dist}
 Summary:        nextcloud integration for FreeIPA
 
@@ -95,6 +95,9 @@ fi
 %{ipa_python3_sitelib}/ipaserver/plugins/*
 
 %changelog
+* Wed Aug 11 2021 Jasper Roloff <jasperroloff@gmail.com> 0.1.6-1
+- fix error with groups_mod callback (jasperroloff@gmail.com)
+
 * Wed Aug 11 2021 Jasper Roloff <jasperroloff@gmail.com> 0.1.5-1
 - fix import issue (jasperroloff@gmail.com)
 
