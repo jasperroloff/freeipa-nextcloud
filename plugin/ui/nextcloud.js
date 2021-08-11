@@ -48,7 +48,7 @@
  * Copy file to /usr/share/ipa/ui/js/plugins/nextcloud/nextcloud.js
  *
  */
-define(['freeipa/phases', 'freeipa/user'], function (phases, user_mod) {
+define(['freeipa/phases', 'freeipa/user', 'freeipa/group'], function (phases, user_mod, group_mod) {
 
     // helper function
     function get_item(array, attr, value) {
