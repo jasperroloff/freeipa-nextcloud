@@ -87,7 +87,7 @@ fi
 
 %files
 %license LICENSE
-#%_datadir/ipa/schema.d/*
+%_datadir/ipa/schema.d/*
 #%_datadir/ipa/updates/*
 %_datadir/ipa/ui/js/plugins/%{plugin_name}/*
 
