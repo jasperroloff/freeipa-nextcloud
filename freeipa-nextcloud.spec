@@ -4,7 +4,7 @@
 %global ipa_python3_sitelib %{python3_sitelib}
 
 Name:           freeipa-%{plugin_name}
-Version:        0.1.0
+Version:        0.1.1
 Release:        1%{?dist}
 Summary:        nextcloud integration for FreeIPA
 
@@ -95,3 +95,6 @@ fi
 %{ipa_python3_sitelib}/ipaserver/plugins/*
 
 %changelog
+* Wed Aug 11 2021 Jasper Roloff <jasperroloff@gmail.com> 0.1.1-1
+- new package built with tito
+
