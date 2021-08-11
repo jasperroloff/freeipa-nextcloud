@@ -1,7 +1,7 @@
 /*
  *###############################################################################
- * userncenabled.js - FreeIPA plugin to allow to enable users for nextcloud 
- *                    via web ui
+ * nextcloud.js - FreeIPA plugin to allow to enable users for nextcloud
+ *                    & set quotas via web ui
  *###############################################################################
  *
  * Copyright (C) $( 2020 ) Radio Bern RaBe
@@ -32,11 +32,15 @@
  * With this plugin a checkbox will be added to the user settings to enable or
  * disable nextcloud. It will set the Attribute nextcloudEnabled either to 
  * TRUE or FALSE.
+ * With this plugin an input box will be added to the user settings in the web
+ * ui to set a quota for users connecting to nextcloud. It will set the
+ * Attribute nextcloudQuota. Allowed values are 'default' or an integer with
+ * 'MB', 'GB' etc.
  *
  * For this to work, extending the LDAP schema is required.
  *
  * Installation:
- * Copy file to /usr/share/ipa/ui/js/plugins/userncenabled/userncenabled.js
+ * Copy file to /usr/share/ipa/ui/js/plugins/nextcloud/nextcloud.js
  *
  */
 define(['freeipa/phases', 'freeipa/user'], function (phases, user_mod) {
@@ -50,22 +54,34 @@ define(['freeipa/phases', 'freeipa/user'], function (phases, user_mod) {
         return null;
     }
 
-    var nc_enabled_plugin = {};
+    var nc_plugin = {};
 
-    // adds nextcloud enabled field into user account facet
-    nc_enabled_plugin.add_nc_enabled_pre_op = function () {
-        var facet = get_item(user_mod.entity_spec.facets, '$type', 'details');
-        var section = get_item(facet.sections, 'name', 'account');
-        section.fields.push({
-            $type: 'checkbox',
-            name: 'nextcloudenabled',
-            label: 'Nextcloud Share enabled',
-            flags: ['w_if_no_aci']
-        });
+    // adds nextcloud section into user account facet
+    nc_plugin.add_nc_plugin_pre_op = function () {
+        let facet = get_item(user_mod.entity_spec.facets, '$type', 'details');
+        let nextcloud_section = {
+                name: 'nextcloud',
+                label: 'Nextcloud',
+                fields: [
+                    {
+                        $type: 'checkbox',
+                        name: 'nextcloudenabled',
+                        label: 'Nextcloud enabled',
+                        flags: ['w_if_no_aci']
+                    },
+                    {
+                        name: 'nextcloudquota',
+                        label: 'Nextcloud quota',
+                        flags: ['w_if_no_aci']
+                    },
+                ]
+            };
+
+            facet.sections.push(nextcloud_section);
         return true;
     };
 
-    phases.on('customization', nc_enabled_plugin.add_nc_enabled_pre_op);
+    phases.on('customization', nc_plugin.add_nc_plugin_pre_op);
 
-    return nc_enabled_plugin;
+    return nc_plugin;
 });
