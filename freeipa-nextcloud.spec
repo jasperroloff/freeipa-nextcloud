@@ -4,7 +4,7 @@
 %global ipa_python3_sitelib %{python3_sitelib}
 
 Name:           freeipa-%{plugin_name}
-Version:        0.1.3
+Version:        0.1.0
 Release:        1%{?dist}
 Summary:        nextcloud integration for FreeIPA
 
