@@ -27,7 +27,12 @@
  *
  * Authors:
  *  Simon Nussbaum <smirta@gmx.net>
- *
+ * --------------------------------------------------------------------------
+ * Adjustments 2021 by Jasper Roloff <jasperroloff@gmail.com>
+ * - merge both plugins into one single plugin
+ * - restructure file
+ * - add support for nextcloud groups
+ * --------------------------------------------------------------------------
  * Description:
  * With this plugin a checkbox will be added to the user settings to enable or
  * disable nextcloud. It will set the Attribute nextcloudEnabled either to 
@@ -57,7 +62,7 @@ define(['freeipa/phases', 'freeipa/user'], function (phases, user_mod) {
     var nc_plugin = {};
 
     // adds nextcloud section into user account facet
-    nc_plugin.add_nc_plugin_pre_op = function () {
+    nc_plugin.add_nc_plugin_user_pre_op = function () {
         let facet = get_item(user_mod.entity_spec.facets, '$type', 'details');
         let nextcloud_section = {
                 name: 'nextcloud',
@@ -81,7 +86,29 @@ define(['freeipa/phases', 'freeipa/user'], function (phases, user_mod) {
         return true;
     };
 
-    phases.on('customization', nc_plugin.add_nc_plugin_pre_op);
+    // adds nextcloud section into group facet
+    nc_plugin.add_nc_plugin_group_pre_op = function () {
+        let facet = get_item(group_mod.entity_spec.facets, '$type', 'details');
+        let nextcloud_section = {
+                name: 'nextcloud',
+                label: 'Nextcloud',
+                fields: [
+                    {
+                        $type: 'checkbox',
+                        name: 'nextcloudenabled',
+                        label: 'Nextcloud enabled',
+                        flags: ['w_if_no_aci']
+                    },
+                ]
+            };
+
+            facet.sections.push(nextcloud_section);
+        return true;
+    };
+
+    phases.on('customization', nc_plugin.add_nc_plugin_user_pre_op);
+    phases.on('customization', nc_plugin.add_nc_plugin_group_pre_op);
+
 
     return nc_plugin;
 });

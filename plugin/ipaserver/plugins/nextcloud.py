@@ -26,29 +26,97 @@
 # Authors:
 #  Simon Nussbaum <smirta@gmx.net>
 #
+# --------------------------------------------------------------------------
+# Adjustments 2021 Jasper Roloff <jasperroloff@gmail.com>
+# - merge both plugins into one single plugin
+# - restructure file
+# - add FreeIPA permissions
+# - add support for groups
+# --------------------------------------------------------------------------
+#
 # Description:
-# With this plugin a switch will be added to the ipa cli to allow users to
+# With this plugin a switch will be added to the ipa cli to allow users/groups to
 # connect to nextcloud. It will set the Attribute nextcloudEnabled either to
 # TRUE or FALSE.
 #
-# With this plugin a switch will be added to the ipa cli to set a quota for
+# Also, a switch will be added to the ipa cli to set a quota for
 # users connecting to nextcloud. It will set the Attribute nextcloudQuota.
 # Allowed values are 'default' or an integer with 'MB', 'GB' etc.
 #
 #
 # For this to work, extending the LDAP schema is required.
 #
-# Installation:
-# Copy file to <path to python lib>/ipaserver/plugins/
-#
 # Usage:
+# ipa group-mod --nextcloudenabled=TRUE <groupname>
 # ipa user-mod --nextcloudenabled=TRUE <username>
 # ipa user-mod --nextcloudquota="100 MB" <username>
 #
 
-from ipaserver.plugins import user
+from ipaserver.plugins import user, group
 from ipalib.parameters import Str, Bool
 from ipalib.text import _
+
+
+# for groups
+
+def groupadd_precallback(self, ldap, dn, entry, attrs_list, *keys, **options):
+    entry['objectclass'].append('nextcloudgroup')
+    return dn
+
+
+def groupmod_precallback(self, ldap, dn, entry, attrs_list, *keys, **options):
+    if 'objectclass' not in entry.keys():
+        old_entry = ldap.get_entry(dn, ['objectclass'])
+        entry['objectclass'] = old_entry['objectclass']
+    entry['objectclass'].append('nextcloudgroup')
+    return dn
+
+
+group.group.takes_params = group.group.takes_params + (
+    Bool('nextcloudenabled?',
+         cli_name='nextcloudenabled',
+         label=_('Nextcloud enabled?'),
+         doc=_('Whether or not a nextcloud is enabled for this group (default is false).'),
+         default=False,
+         autofill=True,
+         ),
+)
+group.group_add.register_pre_callback(groupadd_precallback)
+group.group.register_pre_callback(groupmod_precallback)
+group.group.default_attributes = group.group.default_attributes + ['nextcloudenabled']
+group.group.managed_permissions = {**group.group.managed_permissions, **{
+    'System: Read Group Nextcloud Attributes': {
+        'ipapermbindruletype': 'anonymous',
+        'ipapermright': {'read', 'search', 'compare'},
+        'ipapermdefaultattr': {
+            'nextcloudenabled'
+        },
+    },
+
+    'System: Modify Group Nextcloud Attributes': {
+        'ipapermbindruletype': 'permission',
+        'ipapermright': {'write', 'add', 'delete'},
+        'ipapermdefaultattr': {
+            'nextcloudenabled'
+        },
+    },
+}}
+
+
+# for users
+
+def useradd_precallback(self, ldap, dn, entry, attrs_list, *keys, **options):
+    entry['objectclass'].append('nextclouduser')
+    return dn
+
+
+def usermod_precallback(self, ldap, dn, entry, attrs_list, *keys, **options):
+    if 'objectclass' not in entry.keys():
+        old_entry = ldap.get_entry(dn, ['objectclass'])
+        entry['objectclass'] = old_entry['objectclass']
+    entry['objectclass'].append('nextclouduser')
+    return dn
+
 
 user.user.takes_params = user.user.takes_params + (
     Bool('nextcloudenabled?',
@@ -70,24 +138,23 @@ user.user.takes_params = user.user.takes_params + (
         ),
 )
 
-user.user.default_attributes.append('nextcloudquota')
-user.user.default_attributes.append('nextcloudenabled')
-
-
-def useradd_precallback(self, ldap, dn, entry, attrs_list, *keys, **options):
-    entry['objectclass'].append('nextclouduser')
-    return dn
-
-
+user.user.default_attributes = user.user.default_attributes + ['nextcloudquota', 'nextcloudenabled']
 user.user_add.register_pre_callback(useradd_precallback)
-
-
-def usermod_precallback(self, ldap, dn, entry, attrs_list, *keys, **options):
-    if 'objectclass' not in entry.keys():
-        old_entry = ldap.get_entry(dn, ['objectclass'])
-        entry['objectclass'] = old_entry['objectclass']
-    entry['objectclass'].append('nextclouduser')
-    return dn
-
-
 user.user_mod.register_pre_callback(usermod_precallback)
+user.user.managed_permissions = {**user.user.managed_permissions, **{
+    'System: Read User Nextcloud Attributes': {
+        'ipapermbindruletype': 'anonymous',
+        'ipapermright': {'read', 'search', 'compare'},
+        'ipapermdefaultattr': {
+            'nextcloudenabled', 'nextcloudquota'
+        },
+    },
+
+    'System: Modify User Nextcloud Attributes': {
+        'ipapermbindruletype': 'permission',
+        'ipapermright': {'write', 'add', 'delete'},
+        'ipapermdefaultattr': {
+            'nextcloudenabled', 'nextcloudquota'
+        },
+    },
+}}
