@@ -5,7 +5,7 @@
 
 Name:           freeipa-%{plugin_name}
 Version:        0.1.9
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        nextcloud integration for FreeIPA
 
 BuildArch:      noarch
@@ -95,6 +95,9 @@ fi
 %{ipa_python3_sitelib}/ipaserver/plugins/*
 
 %changelog
+* Fri Feb 23 2024 Jasper Roloff <jasperroloff@gmail.com> 0.1.9-4
+- GitHub actions: fix variable name (jasperroloff@gmail.com)
+
 * Fri Feb 23 2024 Jasper Roloff <jasperroloff@gmail.com> 0.1.9-3
 - GitHub actions: install EPEL for rockylinux targets to be able to use tito
   (jasperroloff@gmail.com)
