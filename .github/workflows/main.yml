@@ -17,6 +17,10 @@ jobs:
     runs-on: ubuntu-latest
     container: ${{ matrix.container }}
     steps:
+    - name: Enable EPEL (if rockylinux)
+      if: "${{ startsWith(github.ref, 'rockylinux:') }}"
+      run: dnf install -y epel-release
+
     - name: Install build tools
       run: dnf install -y git tito
 
