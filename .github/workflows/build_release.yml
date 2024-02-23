@@ -30,6 +30,7 @@ jobs:
 
     - name: Build rpm
       run: |
+        # Fix for: https://github.com/actions/checkout/issues/766 (git CVE-2022-24765)
         git config --global --add safe.directory "$GITHUB_WORKSPACE"
         cd $GITHUB_WORKSPACE
         tito build --offline --rpm -o .
@@ -37,7 +38,7 @@ jobs:
     - name: Test installation of built rpm
       run: dnf install -y noarch/*.rpm
 
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v2
       with:
         name: rpms
         path: ${{ github.workspace }}/noarch/*.rpm
