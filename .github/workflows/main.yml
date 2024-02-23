@@ -18,7 +18,7 @@ jobs:
     container: ${{ matrix.container }}
     steps:
     - name: Enable EPEL (if rockylinux)
-      if: "${{ startsWith(github.ref, 'rockylinux:') }}"
+      if: "${{ startsWith(matrix.container, 'rockylinux:') }}"
       run: dnf install -y epel-release
 
     - name: Install build tools
